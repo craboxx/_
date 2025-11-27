@@ -1,19 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>CRAD</title>
-<style>body{margin:0;height:100vh;background:#000}</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CRAD Redirect</title>
 </head>
 <body>
-<script>
-setTimeout(async()=>{
-  try{
-    const res=await fetch('https://crad-8e69b-default-rtdb.asia-southeast1.firebasedatabase.app/public/tunnel_url/url.json');
-    const url=await res.text();
-    if(url)window.location.href=url.trim();
-  }catch(e){}
-},500);
-</script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBvTnL0VMbQ5RlpKW0CUaiT5vzAVPL97Y4",
+      authDomain: "crad-8e69b.firebaseapp.com",
+      databaseURL: "https://crad-8e69b-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "crad-8e69b",
+      storageBucket: "crad-8e69b.firebasestorage.app",
+      messagingSenderId: "529233840442",
+      appId: "1:529233840442:web:3fb391862ee53e2cf7a803"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const urlRef = ref(db, "public/tunnel_url/url");
+
+    onValue(urlRef, (snapshot) => {
+      const url = snapshot.val();
+      if (url && typeof url === "string") {
+        window.location.href = url;
+      }
+    }, (error) => {
+      console.error("Unable to access Firebase:", error);
+      // Fallback redirect after 5 seconds or handle error gracefully
+      setTimeout(() => {
+        alert('Failed to load redirect URL!');
+      }, 5000);
+    });
+  </script>
 </body>
 </html>
