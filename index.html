@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRAD Project - Live Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .btn {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        #visitBtn {
+            background: #fff;
+            color: #667eea;
+        }
+        #visitBtn:hover {
+            box-shadow: 0 6px 20px rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        #copyBtn {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: 2px solid #fff;
+        }
+        #copyBtn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        #copyBtn.copied {
+            background: #48bb78;
+            border-color: #48bb78;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        @media (max-width: 500px) {
+            .btn {
+                padding: 18px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a id="visitBtn" class="btn loading">Loading...</a>
+        <button id="copyBtn" class="btn loading">Copy</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvTnL0VMbQ5RlpKW0CUaiT5vzAVPL97Y4",
+            authDomain: "crad-8e69b.firebaseapp.com",
+            databaseURL: "https://crad-8e69b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "crad-8e69b",
+            storageBucket: "crad-8e69b.firebasestorage.app",
+            messagingSenderId: "529233840442",
+            appId: "1:529233840442:web:3fb391862ee53e2cf7a803"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const urlRef = ref(database, 'public/tunnel_url');
+
+        let currentURL = '';
+
+        // Listen for real-time updates
+        onValue(urlRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.url) {
+                currentURL = data.url;
+                updateButtons(currentURL);
+            }
+        });
+
+        function updateButtons(url) {
+            const visitBtn = document.getElementById('visitBtn');
+            const copyBtn = document.getElementById('copyBtn');
+
+            visitBtn.href = url;
+            visitBtn.textContent = 'Visit';
+            visitBtn.classList.remove('loading');
+
+            copyBtn.textContent = 'Copy';
+            copyBtn.classList.remove('loading');
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', async function() {
+            const btn = this;
+            try {
+                await navigator.clipboard.writeText(currentURL);
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        });
+    </script>
+</body>
+</html>
